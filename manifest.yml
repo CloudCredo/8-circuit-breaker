@@ -1,0 +1,37 @@
+---
+applications:
+- name: request-data-worker
+  memory: 128M
+  no-route: true
+  path: ./request-data
+  command: bundle exec ./worker
+  instances: 2
+  services:
+  - async-redis
+
+- name: request-data-api
+  memory: 128M
+  path: ./request-data
+  random-route: true
+  services:
+  - async-redis
+
+- name: questions
+  memory: 256M
+  path: ./questions/build/libs/questions-0.8.0-SNAPSHOT.jar
+  random-route: true
+  services:
+  - questions-redis
+
+- name: feedback
+  memory: 256M
+  path: ./feedback/build/libs/feedback-0.8.0-SNAPSHOT.jar
+  random-route: true
+  env:
+    MY_MICROSERVICE_URL: 'localhost' # Microservice bonus task!
+  services:
+  - questions
+  - feedback-redis
+  - async-redis
+  - request-data
+

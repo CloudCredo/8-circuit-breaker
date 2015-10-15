@@ -1,0 +1,7 @@
+/feedback/src/main/resources/application-cf*.properties
+**/.gradle
+**/build/
+/.idea/
+/*.iml
+/tmp
+/my-microservice
