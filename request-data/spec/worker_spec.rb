@@ -47,8 +47,8 @@ RSpec.describe Worker do
     end
   end
 
-  describe '#requests_per_second' do
-    it 'returns the number of requests per second received by the worker'
+  describe '#requests_per_minute' do
+    it 'returns the number of requests per minute received by the worker'
   end
 
   describe '#increment_request_count' do

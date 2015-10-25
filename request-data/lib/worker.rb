@@ -47,9 +47,9 @@ class Worker
     "Worker #{worker_key_prefix.split(':').last}"
   end
 
-  def requests_per_second
+  def requests_per_minute
     seconds_running = (Time.now - start_time)
-    request_count / seconds_running
+    request_count / (seconds_running / 60.0)
   end
 
   def increment_request_count

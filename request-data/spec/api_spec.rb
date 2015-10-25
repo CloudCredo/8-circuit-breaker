@@ -43,11 +43,11 @@ RSpec.describe API do
         },
         workers: [{
                     name: 'Worker 1',
-                    requestRate: 10.0
+                    requestRate: 600.0
                   },
                   {
                     name: 'Worker 2',
-                    requestRate: 20.0
+                    requestRate: 1200.0
                   }]
       }.to_json
 
@@ -71,23 +71,7 @@ RSpec.describe API do
     end
 
     context 'when a worker\'s keys have expired' do
-      it 'does not return data for the worker' do
-        expected_response = {
-          requests: {
-            GET: {
-              '/feedback' => 2
-            },
-            POST: {
-              '/feedback' => 1,
-              '/questions' => 3
-            }
-          },
-          workers: [{
-                      name: 'Worker 1',
-                      requestRate: 10.0
-                    }]
-        }.to_json
-
+      before do
         allow(redis).to receive(:keys).with('space_id:aggregatedMetadata*').and_return(%w[
           space_id:aggregatedMetadata:GET:/feedback
           space_id:aggregatedMetadata:POST:/feedback
@@ -101,10 +85,35 @@ RSpec.describe API do
         allow(redis).to receive(:get).with('space_id:requestRateLogger:2:requestCount').and_return(nil)
         allow(redis).to receive(:get).with('space_id:requestRateLogger:1:startTime').and_return((Time.now - 2).to_s)
         allow(redis).to receive(:get).with('space_id:requestRateLogger:2:startTime').and_return(nil)
+        allow(redis).to receive(:srem).with('space_id:requestRateLogger:instances', anything)
+      end
+
+      it 'does not return data for the worker' do
+        expected_response = {
+          requests: {
+            GET: {
+              '/feedback' => 2
+            },
+            POST: {
+              '/feedback' => 1,
+              '/questions' => 3
+            }
+          },
+          workers: [{
+                      name: 'Worker 1',
+                      requestRate: 600.0
+                    }]
+        }.to_json
 
         get '/request-data'
 
         expect(last_response.body).to eq(expected_response)
+      end
+
+      it 'deregisters the expired workers' do
+        expect(redis).to receive(:srem).with('space_id:requestRateLogger:instances', 'space_id:requestRateLogger:2')
+
+        get '/request-data'
       end
     end
   end

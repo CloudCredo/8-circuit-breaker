@@ -49,12 +49,14 @@ class API < Sinatra::Base
     workers = Worker.all_workers(redis, app_environment_id: app_environment_id)
 
     workers.each_with_object([]) do |worker, worker_data|
-      return worker_data unless worker.exists?
-
-      worker_data << {
-        name: worker.name,
-        requestRate: worker.requests_per_second
-      }
+      if worker.exists?
+        worker_data << {
+          name: worker.name,
+          requestRate: worker.requests_per_minute
+        }
+      else
+        worker.deregister
+      end
     end
   end
 
