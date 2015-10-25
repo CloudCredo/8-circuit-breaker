@@ -53,9 +53,6 @@ angular.module('asyncWorkers', ['chart.js'])
 
         $scope.requestRateChartLabels = data.map(toWorkerName);
         $scope.requestRateChartData = [data.map(toRequestRate)];
-
-        console.log($scope.requestRateChartLabels);
-        console.log($scope.requestRateChartData);
       }
 
       AsyncWorkersService.getData().$promise.then(function (response) {
